@@ -37,7 +37,7 @@ public class LoginScreen extends JFrame implements ActionListener {
 
         passwordField = new JPasswordField(20);
         passwordField.setBounds(100, 50, 165, 25);
-        // Aggiungi un ActionListener per il tasto "Invio"
+
         passwordField.addActionListener(this);
         panel.add(passwordField);
 
@@ -56,7 +56,6 @@ public class LoginScreen extends JFrame implements ActionListener {
 
             dispose();
 
-            // Qui apriamo l'applicazione principale
             MainApplicationWindow mainApp = new MainApplicationWindow();
             mainApp.setVisible(true);
         } else {
