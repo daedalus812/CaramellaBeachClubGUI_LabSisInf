@@ -1,14 +1,13 @@
 import javax.swing.*;
 import java.awt.event.*;
 
-
 public class LoginScreen extends JFrame implements ActionListener {
     private JTextField usernameField;
     private JPasswordField passwordField;
 
     public LoginScreen() {
-        setTitle("Caramella Beach Club Manager");
-        setSize(380, 150);
+        setTitle("Accesso al CBM");
+        setSize(300, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
@@ -38,6 +37,8 @@ public class LoginScreen extends JFrame implements ActionListener {
 
         passwordField = new JPasswordField(20);
         passwordField.setBounds(100, 50, 165, 25);
+        // Aggiungi un ActionListener per il tasto "Invio"
+        passwordField.addActionListener(this);
         panel.add(passwordField);
 
         JButton loginButton = new JButton("Login");
@@ -53,10 +54,9 @@ public class LoginScreen extends JFrame implements ActionListener {
         if (username.equals("admin") && password.equals("admin")) {
             JOptionPane.showMessageDialog(this, "Ti sei loggato con successo!");
 
-
             dispose();
 
-            //Qui apriamo l'applicazione principale
+            // Qui apriamo l'applicazione principale
             MainApplicationWindow mainApp = new MainApplicationWindow();
             mainApp.setVisible(true);
         } else {
