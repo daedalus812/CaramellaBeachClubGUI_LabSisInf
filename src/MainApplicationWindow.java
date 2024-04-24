@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -10,9 +9,12 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class MainApplicationWindow extends JFrame {
     private JTree menuTree;
+    private JPanel leftPanel;
+    private JList<String> fornitoriList;
 
     public MainApplicationWindow() {
         setTitle("Caramella Beach Club - DB GUI");
@@ -34,18 +36,12 @@ public class MainApplicationWindow extends JFrame {
 
         mainPanel.add(new JScrollPane(menuTree), BorderLayout.WEST);
 
+        leftPanel = new JPanel(new BorderLayout());
+        mainPanel.add(leftPanel, BorderLayout.CENTER);
+
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
-    /*private void setAppIcon() {
-        try {
-            BufferedImage iconImage = ImageIO.read(getClass().getResource("/media/logo.png"));
-            setIconImage(iconImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     private void createMenuTree() {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Home");
@@ -90,8 +86,45 @@ public class MainApplicationWindow extends JFrame {
 
         DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) menuTree.getCellRenderer();
         renderer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+
+        // Aggiungi un listener per gestire gli eventi di selezione nell'albero del menu
+        menuTree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) menuTree.getLastSelectedPathComponent();
+
+                // Se l'opzione "Fornitori" è stata selezionata, visualizza l'elenco dei fornitori
+                if (selectedNode != null && selectedNode.toString().equals("Fornitori")) {
+                    showFornitoriList();
+                } else {
+                    // Altrimenti, nascondi il pannello dei fornitori
+                    hideFornitoriList();
+                }
+            }
+        });
     }
 
+    // Metodo per mostrare l'elenco dei fornitori
+    private void showFornitoriList() {
+        // Recupera i dati dei fornitori dal database
+        ArrayList<String> fornitori = DatabaseManager.getFornitori();
+
+        // Popola la lista dei fornitori
+        fornitoriList = new JList<>(fornitori.toArray(new String[0]));
+
+        // Aggiungi la lista dei fornitori al pannello sinistro
+        leftPanel.removeAll();
+        leftPanel.add(new JScrollPane(fornitoriList), BorderLayout.CENTER);
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
+
+    // Metodo per nascondere l'elenco dei fornitori
+    private void hideFornitoriList() {
+        leftPanel.removeAll();
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApplicationWindow::new);
