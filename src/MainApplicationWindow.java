@@ -2,10 +2,14 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.sql.*;
 
 public class MainApplicationWindow extends JFrame {
     private JTree menuTree;
@@ -15,7 +19,7 @@ public class MainApplicationWindow extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        setAppIcon();
+        //setAppIcon();
 
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -34,26 +38,23 @@ public class MainApplicationWindow extends JFrame {
         setVisible(true);
     }
 
-    private void setAppIcon() {
-        BufferedImage iconImage = null;
+    /*private void setAppIcon() {
         try {
-            iconImage = ImageIO.read(new File("media/logo.png"));
+            BufferedImage iconImage = ImageIO.read(getClass().getResource("/media/logo.png"));
+            setIconImage(iconImage);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-        if (iconImage != null) {
-            setIconImage(iconImage);
-        }
-    }
+    }*/
 
     private void createMenuTree() {
-
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Home");
 
         DefaultMutableTreeNode fornitoriMagazzinoNode = new DefaultMutableTreeNode("Fornitori e Magazzino");
         rootNode.add(fornitoriMagazzinoNode);
+
+        DefaultMutableTreeNode fornitoriNode = new DefaultMutableTreeNode("Fornitori");
+        fornitoriMagazzinoNode.add(fornitoriNode);
 
         DefaultMutableTreeNode spiaggiaOmbrelloniNode = new DefaultMutableTreeNode("Spiaggia e Ombrelloni");
         rootNode.add(spiaggiaOmbrelloniNode);
@@ -61,31 +62,28 @@ public class MainApplicationWindow extends JFrame {
         DefaultMutableTreeNode eventiCateringNode = new DefaultMutableTreeNode("Eventi e Catering");
         rootNode.add(eventiCateringNode);
 
-
-        DefaultMutableTreeNode fornitoriNode = new DefaultMutableTreeNode("Fornitori");
         DefaultMutableTreeNode ordiniNode = new DefaultMutableTreeNode("Ordini");
-        DefaultMutableTreeNode prodottiNode = new DefaultMutableTreeNode("Prodotti");
-
-
-        fornitoriMagazzinoNode.add(fornitoriNode);
         fornitoriMagazzinoNode.add(ordiniNode);
+
+        DefaultMutableTreeNode prodottiNode = new DefaultMutableTreeNode("Prodotti");
         fornitoriMagazzinoNode.add(prodottiNode);
 
-
         DefaultMutableTreeNode prenotazioniNode = new DefaultMutableTreeNode("Prenotazioni");
-        DefaultMutableTreeNode ombrelloniNode = new DefaultMutableTreeNode("Ombrelloni");
-        DefaultMutableTreeNode servizioSpiaggiaNode = new DefaultMutableTreeNode("Servizio Spiaggia");
-
         spiaggiaOmbrelloniNode.add(prenotazioniNode);
+
+        DefaultMutableTreeNode ombrelloniNode = new DefaultMutableTreeNode("Ombrelloni");
         spiaggiaOmbrelloniNode.add(ombrelloniNode);
+
+        DefaultMutableTreeNode servizioSpiaggiaNode = new DefaultMutableTreeNode("Servizio Spiaggia");
         spiaggiaOmbrelloniNode.add(servizioSpiaggiaNode);
 
         DefaultMutableTreeNode eventiNode = new DefaultMutableTreeNode("Eventi");
-        DefaultMutableTreeNode prenotazioniEventiNode = new DefaultMutableTreeNode("Prenotazioni");
-        DefaultMutableTreeNode serviziEventiNode = new DefaultMutableTreeNode("Servizi");
-
         eventiCateringNode.add(eventiNode);
+
+        DefaultMutableTreeNode prenotazioniEventiNode = new DefaultMutableTreeNode("Prenotazioni");
         eventiCateringNode.add(prenotazioniEventiNode);
+
+        DefaultMutableTreeNode serviziEventiNode = new DefaultMutableTreeNode("Servizi");
         eventiCateringNode.add(serviziEventiNode);
 
         menuTree = new JTree(rootNode);
@@ -93,6 +91,7 @@ public class MainApplicationWindow extends JFrame {
         DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) menuTree.getCellRenderer();
         renderer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApplicationWindow::new);
