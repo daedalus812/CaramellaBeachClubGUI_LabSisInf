@@ -1,4 +1,4 @@
-# Database Manager with GUI - Java&PostgreSQL🏖️
+# Database Manager with GUI - Java&PostgreSQL 🛢
 
 This Windows program was created for Laboratory of Information Systems course at the University of Calabria. It facilitates the management of your database and access to it.
 
