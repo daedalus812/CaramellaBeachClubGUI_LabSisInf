@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
@@ -102,13 +104,40 @@ public class MainApplicationWindow extends JFrame {
 
 
     private void showFornitoriList() {
+        ArrayList<String[]> fornitori = DatabaseManager.getFornitori();
 
-        ArrayList<String> fornitori = DatabaseManager.getFornitori();
+        // Definizione delle colonne
+        String[] columnNames = {"ID Fornitore", "Nome", "P.IVA", "Telefono"};
 
-        fornitoriList = new JList<>(fornitori.toArray(new String[0]));
+        // Creazione del modello di tabella personalizzato
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
+        // Popolamento della tabella con i dati dei fornitori
+        for (String[] fornitore : fornitori) {
+            tableModel.addRow(fornitore);
+        }
+
+        // Creazione della tabella con il modello personalizzato
+        JTable fornitoriTable = new JTable(tableModel);
+        fornitoriTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // Disabilita il ridimensionamento automatico delle colonne
+
+        // Impostazione della larghezza delle colonne
+        int[] columnWidths = {100, 200, 150, 150};
+        for (int i = 0; i < columnWidths.length; i++) {
+            fornitoriTable.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+        }
+
+        // Creazione del pannello per la tabella
+        JPanel scrollMenuPanel = new JPanel(new BorderLayout());
+        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Aggiungi bordi al pannello
+
+        // Aggiunta della tabella a un pannello scorrevole
+        JScrollPane scrollPane = new JScrollPane(fornitoriTable);
+        scrollMenuPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Aggiunta del pannello scorrevole al pannello sinistro
         leftPanel.removeAll();
-        leftPanel.add(new JScrollPane(fornitoriList), BorderLayout.CENTER);
+        leftPanel.add(scrollMenuPanel, BorderLayout.CENTER);
         leftPanel.revalidate();
         leftPanel.repaint();
     }
