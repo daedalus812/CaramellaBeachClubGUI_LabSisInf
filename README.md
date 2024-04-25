@@ -1,6 +1,6 @@
-# Caramella Beach Club DB GUI 🏖️
+# Database Manager with GUI - Java&PostgreSQL🏖️
 
-Welcome to Caramella Beach Club DB GUI repository! This Windows program is the subject of examination for the Laboratory of Information Systems course at the University of Calabria. It facilitates the management of your database and access to it
+This Windows program was created for Laboratory of Information Systems course at the University of Calabria. It facilitates the management of your database and access to it.
 
 ## Usage 🚀
 
