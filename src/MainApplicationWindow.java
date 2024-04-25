@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -7,6 +9,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -19,18 +23,20 @@ public class MainApplicationWindow extends JFrame {
     private JPanel leftPanel;
     private Connection connection;
     private static MainApplicationWindow instance;
+
     public static MainApplicationWindow getInstance() {
-        if (instance == null) {
-            instance = new MainApplicationWindow();
-        }
         return instance;
     }
+
     public MainApplicationWindow() {
+        DatabaseManager.setMainWindowInstance(this);
+        instance = this;
         setTitle("Caramella Beach Club - DB GUI");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ImageIcon icon = new ImageIcon("media/logo.png");
         setIconImage(icon.getImage());
+        createMenuBar();
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -52,6 +58,28 @@ public class MainApplicationWindow extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    private void createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+        exitMenuItem.addActionListener(e -> System.exit(0)); // Azione per uscire dal programma
+        fileMenu.add(exitMenuItem);
+        menuBar.add(fileMenu);
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutMenuItem = new JMenuItem("About");
+        aboutMenuItem.addActionListener(e -> showAboutDialog()); // Azione per mostrare le informazioni sull'applicazione
+        helpMenu.add(aboutMenuItem);
+        menuBar.add(helpMenu);
+
+        setJMenuBar(menuBar);
+    }
+
+    private void showAboutDialog() {
+        JOptionPane.showMessageDialog(this, "Caramella Beach Club - DB GUI\nVersion 1.0", "About", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void connectToDatabase() {
@@ -192,6 +220,44 @@ public class MainApplicationWindow extends JFrame {
         mainPanel.add(scrollMenuPanel, BorderLayout.CENTER);
         mainPanel.add(controlPanel, BorderLayout.SOUTH);
 
+        // Aggiungi il listener per la ricerca dei fornitori
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateFilter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateFilter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateFilter();
+            }
+
+            private void updateFilter() {
+                String searchText = searchField.getText().trim();
+                TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) fornitoriTable.getRowSorter();
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText)); // Ignora la distinzione tra maiuscole e minuscole
+            }
+        });
+
+        // Aggiungi il listener per il menu contestuale
+        fornitoriTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) { // Verifica se il clic è stato fatto con il tasto destro del mouse
+                    int row = fornitoriTable.rowAtPoint(e.getPoint()); // Ottieni la riga selezionata
+                    if (row >= 0 && row < fornitoriTable.getRowCount()) { // Verifica se la riga è valida
+                        fornitoriTable.setRowSelectionInterval(row, row); // Seleziona la riga cliccata
+                        showPopup(e); // Mostra il menu contestuale
+                    }
+                }
+            }
+        });
+
         leftPanel.removeAll();
         leftPanel.add(mainPanel, BorderLayout.CENTER);
         leftPanel.revalidate();
@@ -225,6 +291,75 @@ public class MainApplicationWindow extends JFrame {
         leftPanel.revalidate();
         leftPanel.repaint();
     }
+
+    // Metodo per mostrare il menu contestuale
+    private void showPopup(MouseEvent e) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem modificaMenuItem = new JMenuItem("Modifica");
+        modificaMenuItem.addActionListener(actionEvent -> {
+            int selectedRow = fornitoriTable.getSelectedRow();
+            String idFornitore = (String) fornitoriTable.getValueAt(selectedRow, 0);
+            showEditFornitoreDialog(idFornitore); // Apre la finestra di dialogo per la modifica dei dati del fornitore
+        });
+        popupMenu.add(modificaMenuItem);
+        popupMenu.show(fornitoriTable, e.getX(), e.getY());
+    }
+
+    // Metodo per mostrare la finestra di dialogo per la modifica dei dati del fornitore
+    private void showEditFornitoreDialog(String idFornitore) {
+        // Ottieni i dati del fornitore dal database utilizzando l'ID fornito
+        String[] datiFornitore = DatabaseManager.getFornitoreById(idFornitore);
+
+        // Crea una finestra di dialogo per la modifica dei dati del fornitore
+        JDialog dialog = new JDialog(this, "Modifica Fornitore", true);
+        dialog.setLayout(new GridLayout(4, 2));
+
+        // Campi di testo per modificare i dati del fornitore
+        JTextField nomeField = new JTextField(datiFornitore[0]);
+        JTextField partitaIVAField = new JTextField(datiFornitore[1]);
+        JTextField telefonoField = new JTextField(datiFornitore[2]);
+
+        // Etichette per i campi di testo
+        JLabel nomeLabel = new JLabel("Nome:");
+        JLabel partitaIVALabel = new JLabel("Partita IVA:");
+        JLabel telefonoLabel = new JLabel("Telefono:");
+
+        // Aggiungi etichette e campi di testo alla finestra di dialogo
+        dialog.add(nomeLabel);
+        dialog.add(nomeField);
+        dialog.add(partitaIVALabel);
+        dialog.add(partitaIVAField);
+        dialog.add(telefonoLabel);
+        dialog.add(telefonoField);
+
+        // Pulsante per confermare la modifica
+        JButton confermaButton = new JButton("Conferma");
+        confermaButton.addActionListener(e -> {
+            // Ottieni i nuovi valori dei campi di testo
+            String nuovoNome = nomeField.getText();
+            String nuovaPartitaIVA = partitaIVAField.getText();
+            String nuovoTelefono = telefonoField.getText();
+
+            // Esegui l'aggiornamento dei dati del fornitore nel database
+            DatabaseManager.updateFornitore(idFornitore, nuovoNome, nuovaPartitaIVA, nuovoTelefono);
+
+            // Chiudi la finestra di dialogo
+            dialog.dispose();
+
+            // Aggiorna la tabella dei fornitori per riflettere le modifiche
+            showFornitoriList();
+        });
+
+        // Aggiungi il pulsante di conferma alla finestra di dialogo
+        dialog.add(confermaButton);
+
+        // Imposta la dimensione e la posizione della finestra di dialogo
+        dialog.setSize(300, 150);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApplicationWindow::new);
     }

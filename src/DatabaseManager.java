@@ -6,6 +6,11 @@ public class DatabaseManager {
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "root";
 
+    private static MainApplicationWindow mainWindowInstance;
+
+    public static void setMainWindowInstance(MainApplicationWindow instance) {
+        mainWindowInstance = instance;
+    }
 
     public static ArrayList<String[]> getFornitori() {
         ArrayList<String[]> fornitori = new ArrayList<>();
@@ -44,6 +49,42 @@ public class DatabaseManager {
         }
 
     }
+
+    public static String[] getFornitoreById(String idFornitore) {
+        String[] fornitore = null;
+        String query = "SELECT nome, p_iva, telefono FROM fornitore WHERE id_fornitore = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, idFornitore);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String nome = resultSet.getString("nome");
+                    String partitaIVA = resultSet.getString("p_iva");
+                    String telefono = resultSet.getString("telefono");
+                    fornitore = new String[]{nome, partitaIVA, telefono};
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Errore durante il recupero del fornitore: " + e.getMessage());
+        }
+        return fornitore;
+    }
+
+    public static void updateFornitore(String idFornitore, String nuovoNome, String nuovaPartitaIVA, String nuovoTelefono) {
+        String query = "UPDATE fornitore SET nome = ?, p_iva = ?, telefono = ? WHERE id_fornitore = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, nuovoNome);
+            preparedStatement.setString(2, nuovaPartitaIVA);
+            preparedStatement.setString(3, nuovoTelefono);
+            preparedStatement.setString(4, idFornitore);
+            preparedStatement.executeUpdate();
+            System.out.println("Dati del fornitore aggiornati con successo!");
+        } catch (SQLException e) {
+            System.err.println("Errore durante l'aggiornamento dei dati del fornitore: " + e.getMessage());
+        }
+    }
+
 
     public static void removeFornitore(String idFornitore) {
         try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
