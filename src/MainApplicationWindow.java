@@ -18,7 +18,13 @@ public class MainApplicationWindow extends JFrame {
     private JTree menuTree;
     private JPanel leftPanel;
     private Connection connection;
-
+    private static MainApplicationWindow instance;
+    public static MainApplicationWindow getInstance() {
+        if (instance == null) {
+            instance = new MainApplicationWindow();
+        }
+        return instance;
+    }
     public MainApplicationWindow() {
         setTitle("Caramella Beach Club - DB GUI");
         setSize(800, 600);
@@ -122,7 +128,7 @@ public class MainApplicationWindow extends JFrame {
     }
 
 
-    private void showFornitoriList() {
+    void showFornitoriList() {
         ArrayList<String[]> fornitori = DatabaseManager.getFornitori();
 
         String[] columnNames = {"ID Fornitore", "Nome", "P.IVA", "Telefono"};

@@ -37,10 +37,12 @@ public class DatabaseManager {
                 preparedStatement.setString(4, telefono);
                 preparedStatement.executeUpdate();
                 System.out.println("Fornitore aggiunto con successo!");
+                MainApplicationWindow.getInstance().showFornitoriList();
             }
         } catch (SQLException e) {
             System.err.println("Errore durante l'aggiunta del fornitore: " + e.getMessage());
         }
+
     }
 
     public static void removeFornitore(String idFornitore) {
@@ -50,6 +52,7 @@ public class DatabaseManager {
                 preparedStatement.setString(1, idFornitore);
                 preparedStatement.executeUpdate();
                 System.out.println("Fornitore rimosso con successo!");
+                MainApplicationWindow.getInstance().showFornitoriList();
             }
         } catch (SQLException e) {
             System.err.println("Errore durante la rimozione del fornitore: " + e.getMessage());
