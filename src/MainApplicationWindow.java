@@ -1,18 +1,23 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class MainApplicationWindow extends JFrame {
+    private JTable fornitoriTable;
     private JTree menuTree;
     private JPanel leftPanel;
-    private JList<String> fornitoriList;
+    private Connection connection;
 
     public MainApplicationWindow() {
         setTitle("Caramella Beach Club - DB GUI");
@@ -27,6 +32,8 @@ public class MainApplicationWindow extends JFrame {
             e.printStackTrace();
         }
 
+        connectToDatabase();
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         getContentPane().add(mainPanel);
 
@@ -39,6 +46,20 @@ public class MainApplicationWindow extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    private void connectToDatabase() {
+        String url = "jdbc:postgresql://localhost:5432/postgres";
+        String username = "postgres";
+        String password = "root";
+
+        try {
+            connection = DriverManager.getConnection(url, username, password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Errore durante la connessione al database", "Errore", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
     }
 
     private void createMenuTree() {
@@ -91,11 +112,9 @@ public class MainApplicationWindow extends JFrame {
             public void valueChanged(TreeSelectionEvent e) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) menuTree.getLastSelectedPathComponent();
 
-
                 if (selectedNode != null && selectedNode.toString().equals("Fornitori")) {
                     showFornitoriList();
                 } else {
-
                     hideFornitoriList();
                 }
             }
@@ -106,49 +125,100 @@ public class MainApplicationWindow extends JFrame {
     private void showFornitoriList() {
         ArrayList<String[]> fornitori = DatabaseManager.getFornitori();
 
-        // Definizione delle colonne
         String[] columnNames = {"ID Fornitore", "Nome", "P.IVA", "Telefono"};
 
-        // Creazione del modello di tabella personalizzato
+
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
-        // Popolamento della tabella con i dati dei fornitori
+
         for (String[] fornitore : fornitori) {
             tableModel.addRow(fornitore);
         }
 
-        // Creazione della tabella con il modello personalizzato
-        JTable fornitoriTable = new JTable(tableModel);
-        fornitoriTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // Disabilita il ridimensionamento automatico delle colonne
 
-        // Impostazione della larghezza delle colonne
+        fornitoriTable = new JTable(tableModel);
+        fornitoriTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+
         int[] columnWidths = {100, 200, 150, 150};
         for (int i = 0; i < columnWidths.length; i++) {
             fornitoriTable.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
         }
 
-        // Creazione del pannello per la tabella
+
         JPanel scrollMenuPanel = new JPanel(new BorderLayout());
         scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Aggiungi bordi al pannello
 
-        // Aggiunta della tabella a un pannello scorrevole
+
         JScrollPane scrollPane = new JScrollPane(fornitoriTable);
         scrollMenuPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Aggiunta del pannello scorrevole al pannello sinistro
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        fornitoriTable.setRowSorter(sorter);
+
+
+        Comparator<String> numericComparator = Comparator.comparingInt(Integer::parseInt);
+        sorter.setComparator(0, numericComparator);
+        sorter.setComparator(1, Comparator.naturalOrder());
+
+        JPanel searchPanel = new JPanel(new BorderLayout());
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        JTextField searchField = new JTextField();
+        searchPanel.add(searchField, BorderLayout.CENTER);
+
+
+        JButton addButton = new JButton("Aggiungi Fornitore");
+        addButton.addActionListener(e -> showAddFornitoreDialog());
+
+        JButton removeButton = new JButton("Rimuovi Fornitore");
+        removeButton.addActionListener(e -> removeSelectedFornitore());
+
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        buttonPanel.add(addButton);
+        buttonPanel.add(removeButton);
+
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        controlPanel.add(searchPanel, BorderLayout.NORTH);
+        controlPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(scrollMenuPanel, BorderLayout.CENTER);
+        mainPanel.add(controlPanel, BorderLayout.SOUTH);
+
         leftPanel.removeAll();
-        leftPanel.add(scrollMenuPanel, BorderLayout.CENTER);
+        leftPanel.add(mainPanel, BorderLayout.CENTER);
         leftPanel.revalidate();
         leftPanel.repaint();
     }
 
+    private void hideFornitoriTable() {
+        leftPanel.removeAll();
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
+
+    private void showAddFornitoreDialog() {
+        AddFornitoreDialog dialog = new AddFornitoreDialog(this);
+        dialog.setVisible(true);
+    }
+
+    private void removeSelectedFornitore() {
+        int selectedRow = fornitoriTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String idFornitore = (String) fornitoriTable.getValueAt(selectedRow, 0);
+            DatabaseManager.removeFornitore(idFornitore);
+            ((DefaultTableModel) fornitoriTable.getModel()).removeRow(selectedRow);
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleziona un fornitore da rimuovere", "Errore", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void hideFornitoriList() {
         leftPanel.removeAll();
         leftPanel.revalidate();
         leftPanel.repaint();
     }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApplicationWindow::new);
     }
