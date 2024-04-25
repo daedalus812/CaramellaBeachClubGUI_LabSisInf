@@ -1,6 +1,6 @@
 # Caramella Beach Club DB GUI 🏖️
 
-Welcome to Caramella Beach Club DB GUI repository! This Windows program is the subject of examination for the Laboratory of Information Systems course at the University of Calabria. It facilitates the management of the database and access to the system of the Caramella Beach Club.
+Welcome to Caramella Beach Club DB GUI repository! This Windows program is the subject of examination for the Laboratory of Information Systems course at the University of Calabria. It facilitates the management of your database and access to it
 
 ## Usage 🚀
 
