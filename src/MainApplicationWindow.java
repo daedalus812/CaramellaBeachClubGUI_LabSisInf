@@ -3,12 +3,15 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
@@ -19,6 +22,7 @@ import java.util.Comparator;
 
 public class MainApplicationWindow extends JFrame {
     private JTable fornitoriTable;
+    public static JTable eventiTable;
     private JTree menuTree;
     private JPanel leftPanel;
     private Connection connection;
@@ -46,6 +50,8 @@ public class MainApplicationWindow extends JFrame {
 
         connectToDatabase();
 
+
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         getContentPane().add(mainPanel);
 
@@ -55,6 +61,7 @@ public class MainApplicationWindow extends JFrame {
 
         leftPanel = new JPanel(new BorderLayout());
         mainPanel.add(leftPanel, BorderLayout.CENTER);
+
 
         setLocationRelativeTo(null);
         setVisible(true);
@@ -151,9 +158,16 @@ public class MainApplicationWindow extends JFrame {
                 } else {
                     hideFornitoriList();
                 }
+                if (selectedNode != null && selectedNode.toString().equals("Eventi")) {
+                    showEventiList();
+                } else {
+                    hideEventiList();
+                }
             }
         });
     }
+
+
 
 
     void showFornitoriList() {
@@ -264,12 +278,79 @@ public class MainApplicationWindow extends JFrame {
         leftPanel.repaint();
     }
 
+    void showEventiList() {
+        ArrayList<String[]> eventi = DatabaseManager.getEventi();
+
+        String[] columnNames = {"ID Evento", "Nome", "Data", "Ora"};
+
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+
+        for (String[] evento : eventi) {
+            tableModel.addRow(evento);
+        }
+
+
+        eventiTable = new JTable(tableModel);
+        eventiTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        // Codice per la creazione della tabella, dei pulsanti e del pannello di controllo
+
+        JPanel scrollMenuPanel = new JPanel(new BorderLayout());
+        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Aggiungi bordi al pannello
+
+
+        JScrollPane scrollPane = new JScrollPane(eventiTable);
+        scrollMenuPanel.add(scrollPane, BorderLayout.CENTER);
+
+
+        JPanel searchPanel = new JPanel(new BorderLayout());
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        JTextField searchField = new JTextField();
+        searchPanel.add(searchField, BorderLayout.CENTER);
+
+
+        JButton addButton = new JButton("Aggiungi Evento");
+        addButton.addActionListener(e -> showAddEventoDialog());
+
+        JButton removeButton = new JButton("Rimuovi Evento");
+        removeButton.addActionListener(e -> removeSelectedEvento());
+
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        buttonPanel.add(addButton);
+        buttonPanel.add(removeButton);
+
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        controlPanel.add(searchPanel, BorderLayout.NORTH);
+        controlPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(scrollMenuPanel, BorderLayout.CENTER);
+        mainPanel.add(controlPanel, BorderLayout.SOUTH);
+        eventiTable.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        eventiTable.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JCheckBox()));
+
+        leftPanel.removeAll();
+        leftPanel.add(mainPanel, BorderLayout.CENTER);
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
+
+    private void hideEventiList() {
+        leftPanel.removeAll();
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
+
     private void hideFornitoriTable() {
         leftPanel.removeAll();
         leftPanel.revalidate();
         leftPanel.repaint();
     }
 
+    private void showAddEventoDialog() {
+        AddEventoDialog dialog = new AddEventoDialog(this);
+        dialog.setVisible(true);
+    }
     private void showAddFornitoreDialog() {
         AddFornitoreDialog dialog = new AddFornitoreDialog(this);
         dialog.setVisible(true);
@@ -283,6 +364,17 @@ public class MainApplicationWindow extends JFrame {
             ((DefaultTableModel) fornitoriTable.getModel()).removeRow(selectedRow);
         } else {
             JOptionPane.showMessageDialog(this, "Seleziona un fornitore da rimuovere", "Errore", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void removeSelectedEvento() {
+        int selectedRow = eventiTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String idEvento = (String) eventiTable.getValueAt(selectedRow, 0);
+            DatabaseManager.removeEvento(idEvento);
+            ((DefaultTableModel) eventiTable.getModel()).removeRow(selectedRow);
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleziona un evento da rimuovere", "Errore", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -353,6 +445,82 @@ public class MainApplicationWindow extends JFrame {
         dialog.setVisible(true);
     }
 
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    // Classe interna per l'editing del pulsante "Info" nella tabella degli eventi
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+        private int selectedRow;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Quando il pulsante "Info" viene premuto, mostra la dialog con l'immagine dell'evento
+                    showEventInfoDialog(selectedRow);
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(UIManager.getColor("Button.background"));
+            }
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            selectedRow = row;
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                // Azione quando il pulsante "Info" viene premuto
+                // Qui puoi gestire l'apertura della dialog con l'immagine dell'evento
+            }
+            isPushed = false;
+            return label;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
+    }
+
+    // Metodo per mostrare la dialog con l'immagine dell'evento
+    private void showEventInfoDialog(int row) {
+        // Qui puoi implementare la logica per mostrare l'immagine dell'evento nella dialog
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApplicationWindow::new);
