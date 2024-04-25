@@ -5,7 +5,7 @@ Welcome to Caramella Beach Club DB GUI repository! This Windows program is the s
 ## Usage 🚀
 
 You can use it by modifying its code and adapting it to your database.
-This program is designed to interface with a database for which you have access credentials. As can be seen from the code, the program connects to a PostgreSQL database with various credentials. To use it with your own database, simply change the URL, USERNAME, and PASSWORD with your own data.
+This program is designed to interface with a database for which you have access credentials. As can be seen from the code, the program connects to a PostgreSQL database with various credentials. To use it with your own database, change the URL, USERNAME, and PASSWORD and the other stuffs with your own data
 
 I highly recommend using IntelliJ IDEA for configuring this program.
 
