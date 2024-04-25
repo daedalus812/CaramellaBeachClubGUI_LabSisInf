@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Alternative_GUIDB:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Alternative_GUIDB_jar</output-path>
+    <root id="archive" name="Alternative_GUIDB.jar">
+      <element id="module-output" name="Alternative_GUIDB" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/src/postgresql-42.7.3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

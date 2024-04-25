@@ -157,12 +157,13 @@ public class MainApplicationWindow extends JFrame {
                     showFornitoriList();
                 } else {
                     hideFornitoriList();
+                    if (selectedNode != null && selectedNode.toString().equals("Eventi")) {
+                        showEventiList();
+                    } else {
+                        hideEventiList();
+                    }
                 }
-                if (selectedNode != null && selectedNode.toString().equals("Eventi")) {
-                    showEventiList();
-                } else {
-                    hideEventiList();
-                }
+
             }
         });
     }
@@ -195,7 +196,7 @@ public class MainApplicationWindow extends JFrame {
 
 
         JPanel scrollMenuPanel = new JPanel(new BorderLayout());
-        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Aggiungi bordi al pannello
+        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 
         JScrollPane scrollPane = new JScrollPane(fornitoriTable);
@@ -234,7 +235,7 @@ public class MainApplicationWindow extends JFrame {
         mainPanel.add(scrollMenuPanel, BorderLayout.CENTER);
         mainPanel.add(controlPanel, BorderLayout.SOUTH);
 
-        // Aggiungi il listener per la ricerca dei fornitori
+
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -254,7 +255,7 @@ public class MainApplicationWindow extends JFrame {
             private void updateFilter() {
                 String searchText = searchField.getText().trim();
                 TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) fornitoriTable.getRowSorter();
-                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText)); // Ignora la distinzione tra maiuscole e minuscole
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
             }
         });
 
@@ -293,10 +294,10 @@ public class MainApplicationWindow extends JFrame {
         eventiTable = new JTable(tableModel);
         eventiTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        // Codice per la creazione della tabella, dei pulsanti e del pannello di controllo
+
 
         JPanel scrollMenuPanel = new JPanel(new BorderLayout());
-        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Aggiungi bordi al pannello
+        scrollMenuPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 
         JScrollPane scrollPane = new JScrollPane(eventiTable);
@@ -326,8 +327,7 @@ public class MainApplicationWindow extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(scrollMenuPanel, BorderLayout.CENTER);
         mainPanel.add(controlPanel, BorderLayout.SOUTH);
-        eventiTable.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
-        eventiTable.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JCheckBox()));
+
 
         leftPanel.removeAll();
         leftPanel.add(mainPanel, BorderLayout.CENTER);
@@ -445,84 +445,4 @@ public class MainApplicationWindow extends JFrame {
         dialog.setVisible(true);
     }
 
-    class ButtonRenderer extends JButton implements TableCellRenderer {
-
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
-
-    // Classe interna per l'editing del pulsante "Info" nella tabella degli eventi
-    class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
-        private String label;
-        private boolean isPushed;
-        private int selectedRow;
-
-        public ButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Quando il pulsante "Info" viene premuto, mostra la dialog con l'immagine dell'evento
-                    showEventInfoDialog(selectedRow);
-                    fireEditingStopped();
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            if (isSelected) {
-                button.setForeground(table.getSelectionForeground());
-                button.setBackground(table.getSelectionBackground());
-            } else {
-                button.setForeground(table.getForeground());
-                button.setBackground(UIManager.getColor("Button.background"));
-            }
-            label = (value == null) ? "" : value.toString();
-            button.setText(label);
-            selectedRow = row;
-            isPushed = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                // Azione quando il pulsante "Info" viene premuto
-                // Qui puoi gestire l'apertura della dialog con l'immagine dell'evento
-            }
-            isPushed = false;
-            return label;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
-        }
-
-        @Override
-        protected void fireEditingStopped() {
-            super.fireEditingStopped();
-        }
-    }
-
-    // Metodo per mostrare la dialog con l'immagine dell'evento
-    private void showEventInfoDialog(int row) {
-        // Qui puoi implementare la logica per mostrare l'immagine dell'evento nella dialog
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainApplicationWindow::new);
-    }
 }
