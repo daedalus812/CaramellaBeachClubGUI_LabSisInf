@@ -244,15 +244,15 @@ public class MainApplicationWindow extends JFrame {
             }
         });
 
-        // Aggiungi il listener per il menu contestuale
+
         fornitoriTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) { // Verifica se il clic è stato fatto con il tasto destro del mouse
-                    int row = fornitoriTable.rowAtPoint(e.getPoint()); // Ottieni la riga selezionata
-                    if (row >= 0 && row < fornitoriTable.getRowCount()) { // Verifica se la riga è valida
-                        fornitoriTable.setRowSelectionInterval(row, row); // Seleziona la riga cliccata
-                        showPopup(e); // Mostra il menu contestuale
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = fornitoriTable.rowAtPoint(e.getPoint());
+                    if (row >= 0 && row < fornitoriTable.getRowCount()) {
+                        fornitoriTable.setRowSelectionInterval(row, row);
+                        showPopup(e);
                     }
                 }
             }
@@ -292,39 +292,38 @@ public class MainApplicationWindow extends JFrame {
         leftPanel.repaint();
     }
 
-    // Metodo per mostrare il menu contestuale
     private void showPopup(MouseEvent e) {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem modificaMenuItem = new JMenuItem("Modifica");
         modificaMenuItem.addActionListener(actionEvent -> {
             int selectedRow = fornitoriTable.getSelectedRow();
             String idFornitore = (String) fornitoriTable.getValueAt(selectedRow, 0);
-            showEditFornitoreDialog(idFornitore); // Apre la finestra di dialogo per la modifica dei dati del fornitore
+            showEditFornitoreDialog(idFornitore);
         });
         popupMenu.add(modificaMenuItem);
         popupMenu.show(fornitoriTable, e.getX(), e.getY());
     }
 
-    // Metodo per mostrare la finestra di dialogo per la modifica dei dati del fornitore
+
     private void showEditFornitoreDialog(String idFornitore) {
-        // Ottieni i dati del fornitore dal database utilizzando l'ID fornito
+
         String[] datiFornitore = DatabaseManager.getFornitoreById(idFornitore);
 
-        // Crea una finestra di dialogo per la modifica dei dati del fornitore
+
         JDialog dialog = new JDialog(this, "Modifica Fornitore", true);
         dialog.setLayout(new GridLayout(4, 2));
 
-        // Campi di testo per modificare i dati del fornitore
+
         JTextField nomeField = new JTextField(datiFornitore[0]);
         JTextField partitaIVAField = new JTextField(datiFornitore[1]);
         JTextField telefonoField = new JTextField(datiFornitore[2]);
 
-        // Etichette per i campi di testo
+
         JLabel nomeLabel = new JLabel("Nome:");
         JLabel partitaIVALabel = new JLabel("Partita IVA:");
         JLabel telefonoLabel = new JLabel("Telefono:");
 
-        // Aggiungi etichette e campi di testo alla finestra di dialogo
+
         dialog.add(nomeLabel);
         dialog.add(nomeField);
         dialog.add(partitaIVALabel);
@@ -332,28 +331,23 @@ public class MainApplicationWindow extends JFrame {
         dialog.add(telefonoLabel);
         dialog.add(telefonoField);
 
-        // Pulsante per confermare la modifica
         JButton confermaButton = new JButton("Conferma");
         confermaButton.addActionListener(e -> {
-            // Ottieni i nuovi valori dei campi di testo
+
             String nuovoNome = nomeField.getText();
             String nuovaPartitaIVA = partitaIVAField.getText();
             String nuovoTelefono = telefonoField.getText();
 
-            // Esegui l'aggiornamento dei dati del fornitore nel database
             DatabaseManager.updateFornitore(idFornitore, nuovoNome, nuovaPartitaIVA, nuovoTelefono);
 
-            // Chiudi la finestra di dialogo
             dialog.dispose();
 
-            // Aggiorna la tabella dei fornitori per riflettere le modifiche
             showFornitoriList();
         });
 
-        // Aggiungi il pulsante di conferma alla finestra di dialogo
+
         dialog.add(confermaButton);
 
-        // Imposta la dimensione e la posizione della finestra di dialogo
         dialog.setSize(300, 150);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
