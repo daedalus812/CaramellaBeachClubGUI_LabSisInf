@@ -4,11 +4,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.sql.*;
+
 import java.util.ArrayList;
 
 public class MainApplicationWindow extends JFrame {
@@ -20,8 +16,8 @@ public class MainApplicationWindow extends JFrame {
         setTitle("Caramella Beach Club - DB GUI");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //setAppIcon();
+        ImageIcon icon = new ImageIcon("media/logo.png");
+        setIconImage(icon.getImage());
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -87,39 +83,37 @@ public class MainApplicationWindow extends JFrame {
         DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) menuTree.getCellRenderer();
         renderer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
-        // Aggiungi un listener per gestire gli eventi di selezione nell'albero del menu
+
         menuTree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) menuTree.getLastSelectedPathComponent();
 
-                // Se l'opzione "Fornitori" è stata selezionata, visualizza l'elenco dei fornitori
+
                 if (selectedNode != null && selectedNode.toString().equals("Fornitori")) {
                     showFornitoriList();
                 } else {
-                    // Altrimenti, nascondi il pannello dei fornitori
+
                     hideFornitoriList();
                 }
             }
         });
     }
 
-    // Metodo per mostrare l'elenco dei fornitori
+
     private void showFornitoriList() {
-        // Recupera i dati dei fornitori dal database
+
         ArrayList<String> fornitori = DatabaseManager.getFornitori();
 
-        // Popola la lista dei fornitori
         fornitoriList = new JList<>(fornitori.toArray(new String[0]));
 
-        // Aggiungi la lista dei fornitori al pannello sinistro
         leftPanel.removeAll();
         leftPanel.add(new JScrollPane(fornitoriList), BorderLayout.CENTER);
         leftPanel.revalidate();
         leftPanel.repaint();
     }
 
-    // Metodo per nascondere l'elenco dei fornitori
+
     private void hideFornitoriList() {
         leftPanel.removeAll();
         leftPanel.revalidate();
