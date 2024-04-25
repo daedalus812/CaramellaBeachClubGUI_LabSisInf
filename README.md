@@ -2,40 +2,12 @@
 
 Welcome to Caramella Beach Club DB GUI repository! This Windows program is the subject of examination for the Laboratory of Information Systems course at the University of Calabria. It facilitates the management of the database and access to the system of the Caramella Beach Club.
 
-
-### Functionalities
-
-1️⃣ **Filter Registered Suppliers List**
-
-2️⃣ **Filter Suppliers List:**
-   - By supplied product type
-   - By headquarters location
-   - By date of last paid invoice
-   - By date of last placed order
-   - By date of last unpaid invoice
-
-3️⃣ **Enter Supplier Data**
-   - Add information like company name, VAT number, address, contact name, email.
-
-4️⃣ **View/Update Supplier Data**
-   - View or modify registration information.
-
-5️⃣ **Manage Processed Products List**
-   - View, filter, and manage the list of products.
-
-And so on, up to 50 functionalities in total, covering various aspects of beach club management.
-
-## Installation 💻
-
-To install the DB GUI, simply download the executable file from the Releases section and run it on your Windows machine.
-
 ## Usage 🚀
 
-Once installed, launch the program and navigate through the intuitive user interface to access the different functionalities as per your requirements.
+You can use it by modifying its code and adapting it to your database.
+This program is designed to interface with a database for which you have access credentials. As can be seen from the code, the program connects to a PostgreSQL database with various credentials. To use it with your own database, simply change the URL, USERNAME, and PASSWORD with your own data.
 
-## Contributing 🤝
-
-Contributions are welcome! Feel free to fork this repository, make your changes, and submit a pull request.
+I highly recommend using IntelliJ IDEA for configuring this program.
 
 ## License 📜
 
@@ -47,4 +19,4 @@ We would like to express our gratitude to the University of Calabria for their s
 
 ---
 
-Enjoy managing your beach club effortlessly with this DB GUI! If you have any questions or feedback, don't hesitate to reach out. Happy beach club management! 🏝️✨
+Enjoy managing your database effortlessly with this DB GUI! If you have any questions or feedback, don't hesitate to reach out. Happy beach club management! 🏝️✨
