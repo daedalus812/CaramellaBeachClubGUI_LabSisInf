@@ -19,4 +19,3 @@ We would like to express our gratitude to the University of Calabria for their s
 
 ---
 
-Enjoy managing your database effortlessly with this DB GUI! If you have any questions or feedback, don't hesitate to reach out. Happy beach club management! 🏝️✨
